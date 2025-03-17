@@ -1,0 +1,40 @@
+
+
+const mongoose = require('mongoose');
+
+const userData = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    otp: {
+      type: String,
+    },
+    isOtpVerified: {
+      type: Boolean,
+      default: false,
+    },
+    otpExpires: {
+      type: Date,
+      required: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    role: {
+      type: String,
+      default: "user",
+    },
+    tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }], // private tasks
+    events: [{ type: mongoose.Schema.Types.ObjectId, ref: "Event" }],
+  },
+  { timestamps: true }
+);
+const User = mongoose.model("User", userData);
+module.exports = User;

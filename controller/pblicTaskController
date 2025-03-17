@@ -1,0 +1,78 @@
+
+const GlobalTask = require("../models/globalTaskSchema");
+// Middleware to check admin
+
+
+// Create Global Task (Admin Only)
+const createGlobalTask = async (req, res) => {
+  const { name,description, duration, dependencies, timing } = req.body;
+console.log(name,description);
+
+  try {
+      const newTask = new GlobalTask({
+        name,
+      description,
+      duration,
+      dependencies,
+      timing,
+      createdBy: null, // Global task, no user specific
+    });
+
+    await newTask.save();
+    res.status(201).json(newTask);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to create task",error:err });
+  }
+};
+
+// Get All Global Tasks
+const getGlobalTasks = async (req, res) => {
+
+  try {
+    const tasks = await GlobalTask.find({ createdBy: null , isDelete: false }); // Global tasks only
+    res.status(200).json(tasks);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch global tasks' });
+  }
+};
+
+// Edit Global Task (Admin Only)
+const updateGlobalTask = async (req, res) => {
+  try {
+    const updatedTask = await GlobalTask.findByIdAndUpdate(
+      req.params.id,
+       req.body,
+      { new: true }
+    );
+    if (!updatedTask) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    res.status(200).json(updatedTask);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// // Delete Global Task (Admin Only)
+const deleteGlobalTask= async (req, res) => {
+ try {
+   const updatedTask = await GlobalTask.findByIdAndUpdate(
+     req.params.id,
+     {isDelete:true},
+     { new: true }
+   );
+   if (!updatedTask) {
+     return res.status(404).json({ message: "Task not found" });
+   }
+   res.status(200).json(updatedTask);
+ } catch (err) {
+   res.status(500).json({ error: err.message });
+ }
+};
+
+module.exports = {
+  createGlobalTask,
+  getGlobalTasks,
+  updateGlobalTask,
+  deleteGlobalTask,
+};
