@@ -1,26 +1,23 @@
-const bcrypt = require('bcrypt')
-const User = require('../models/user');
-const { sendOtpEmail } = require('../handler/nodemailer');
-const { generateToken } = require('../handler/jwtGenarate');
-const { encrypt } = require('../handler/crypto');
+const bcrypt = require("bcryptjs");
+const User = require("../models/user");
+const { sendOtpEmail } = require("../handler/nodemailer");
+const { generateToken } = require("../handler/jwtGenarate");
+const { encrypt } = require("../handler/crypto");
 const register = async (req, res) => {
   try {
     const {
       name,
-     
+
       email,
       password,
     } = req.body;
-    if (!name ) {
-      return res
-        .status(400)
-        .json({ message: "Please Provide name" });
+    if (!name) {
+      return res.status(400).json({ message: "Please Provide name" });
     }
 
-  
-       if (!email) {
-         return res.status(400).json({ message: "Please Provide mail id" });
-       }
+    if (!email) {
+      return res.status(400).json({ message: "Please Provide mail id" });
+    }
     if (!password) {
       return res.status(400).json({ message: "Please Provide password" });
     }
@@ -42,7 +39,6 @@ const register = async (req, res) => {
       otp: response,
       otpExpires: expires,
       password: passwordEncrypted,
-    
     });
 
     await newUser.save();
@@ -52,12 +48,10 @@ const register = async (req, res) => {
   } catch (error) {
     console.log(error);
     if (error.name === "ValidationError") {
-      return res
-        .status(400)
-        .json({
-          message: "Please Provide All Required Data",
-          error: error.message,
-        });
+      return res.status(400).json({
+        message: "Please Provide All Required Data",
+        error: error.message,
+      });
     }
     return res
       .status(500)
@@ -69,9 +63,7 @@ const verifyOtp = async (req, res) => {
     const { email, otp } = req.body;
     // || !fcmToken
     if (!email || !otp) {
-      return res
-        .status(401)
-        .json({ message: "Email , and Otp is Required" });
+      return res.status(401).json({ message: "Email , and Otp is Required" });
     }
     const userData = await User.findOne({ email });
     if (!userData) {
@@ -89,21 +81,17 @@ const verifyOtp = async (req, res) => {
     userData.otp = "";
     userData.isOtpVerified = true;
 
-   
-
     const token = generateToken(userData._id, "365d");
     const encryptedToken = encrypt(token);
     await userData.save();
-    return res
-      .status(200)
-      .json({
-        message: "Otp Verified Success",
-        token: encryptedToken,
-        vendorId: userData?._id,
-        isOtpVerified: userData.isOtpVerified,
-        role: userData.role,
-        email,
-      });
+    return res.status(200).json({
+      message: "Otp Verified Success",
+      token: encryptedToken,
+      vendorId: userData?._id,
+      isOtpVerified: userData.isOtpVerified,
+      role: userData.role,
+      email,
+    });
   } catch (error) {
     return res
       .status(500)
@@ -146,11 +134,9 @@ const setNewPassword = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res
-        .status(401)
-        .json({
-          message: "Provide All Required Data - email,fcmToken and password",
-        });
+      return res.status(401).json({
+        message: "Provide All Required Data - email,fcmToken and password",
+      });
     }
     const userData = await User.findOne({ email });
     if (!userData) {
@@ -178,11 +164,9 @@ const login = async (req, res) => {
     const { email, password } = req.body;
     // || !fcmToken
     if (!email || !password) {
-      return res
-        .status(401)
-        .json({
-          message: "Provide All Required Data - email and password",
-        });
+      return res.status(401).json({
+        message: "Provide All Required Data - email and password",
+      });
     }
 
     if (email == "admin@gmail.com" && password == "admin@123") {
@@ -190,13 +174,11 @@ const login = async (req, res) => {
 
       const token = generateToken(adminId, "365d");
       const encryptedToken = encrypt(token);
-      return res
-        .status(200)
-        .json({
-          message: "Successfully Login",
-          token: encryptedToken,
-          role: "admin",
-        });
+      return res.status(200).json({
+        message: "Successfully Login",
+        token: encryptedToken,
+        role: "admin",
+      });
     }
 
     const userData = await User.findOne({ email });
@@ -218,15 +200,12 @@ const login = async (req, res) => {
       userData.otpExpires = expires;
       await userData.save();
 
-      return res
-        .status(200)
-        .json({
-          message: "Your OTP Not Verified - Please Verify",
-          isOtpVerified: userData.isOtpVerified,
-          email,
-        });
+      return res.status(200).json({
+        message: "Your OTP Not Verified - Please Verify",
+        isOtpVerified: userData.isOtpVerified,
+        email,
+      });
     }
-   
 
     const token = generateToken(userData._id, "365d");
     const encryptedToken = encrypt(token);
@@ -246,6 +225,10 @@ const login = async (req, res) => {
       .json({ message: "Internal Server Error", error: error.message });
   }
 };
-module.exports={
-    register,verifyOtp,resentOtp,setNewPassword,login
-}
+module.exports = {
+  register,
+  verifyOtp,
+  resentOtp,
+  setNewPassword,
+  login,
+};
